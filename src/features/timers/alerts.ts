@@ -41,7 +41,7 @@ export async function ensureAlarmPermission(): Promise<boolean> {
  * updated, or started if it has gone.
  */
 export async function showTimerAlerts(timer: Timer, ids: AlertIds, now: number): Promise<AlertIds> {
-  await cancelAlarm(ids.notificationId);
+  await withdrawAlarm(ids.notificationId);
   const running = timer.pausedAt === null && !isDone(timer, now);
   const notificationId = running ? await scheduleAlarm(timer) : null;
   const activityId = await showCountdown(timer, ids.activityId);
@@ -49,8 +49,7 @@ export async function showTimerAlerts(timer: Timer, ids: AlertIds, now: number):
 }
 
 export async function clearTimerAlerts(ids: AlertIds): Promise<void> {
-  await cancelAlarm(ids.notificationId);
-  if (ids.notificationId) await Notifications.dismissNotificationAsync(ids.notificationId);
+  await withdrawAlarm(ids.notificationId);
   await endCountdown(ids.activityId);
 }
 
@@ -81,8 +80,11 @@ async function scheduleAlarm(timer: Timer): Promise<string> {
   });
 }
 
-async function cancelAlarm(notificationId: string | null): Promise<void> {
-  if (notificationId) await Notifications.cancelScheduledNotificationAsync(notificationId);
+/** Cancels the alarm if it's still to come, or clears it off the lock screen if it has gone off. */
+async function withdrawAlarm(notificationId: string | null): Promise<void> {
+  if (!notificationId) return;
+  await Notifications.cancelScheduledNotificationAsync(notificationId);
+  await Notifications.dismissNotificationAsync(notificationId);
 }
 
 async function showCountdown(timer: Timer, activityId: string | null): Promise<string | null> {
