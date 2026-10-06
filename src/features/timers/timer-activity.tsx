@@ -1,5 +1,6 @@
-import { HStack, Image, ProgressView, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { HStack, Image, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
+  activityBackgroundTint,
   font,
   foregroundStyle,
   frame,
@@ -7,14 +8,13 @@ import {
   monospacedDigit,
   multilineTextAlignment,
   padding,
-  tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { createLiveActivity, type LiveActivityEnvironment } from 'expo-widgets';
 
 /** Times are milliseconds since the epoch, because props travel to the widget as JSON. */
 export type TimerActivityProps = {
   label: string;
-  /** The end time less the full length, so the progress bar allows for added minutes. */
+  /** The end time less the full length. iOS's countdown needs a start as well as an end. */
   startedAt: number;
   endsAt: number;
   pausedAt: number | null;
@@ -26,77 +26,81 @@ export type TimerActivityProps = {
  * end time, which is how it knows to show "Done" without the app.
  *
  * This runs in the widget extension's own runtime: everything it uses must be inside the
- * function (see the 'widget' directive in the expo-widgets docs).
+ * function (see the 'widget' directive in the expo-widgets docs). The colours are fixed rather
+ * than following light and dark mode, because the lock screen and Dynamic Island are dark and
+ * `environment.colorScheme` always reads light in the simulator.
  */
 const TimerActivity = (props: TimerActivityProps, environment: LiveActivityEnvironment) => {
   'widget';
-  const dark = environment.colorScheme === 'dark';
-  const accent = dark ? '#5BD6A0' : '#17694A';
-  const alarm = dark ? '#F2B84B' : '#9A4A06';
+  const text = '#E8F0EB';
+  const muted = '#96A99E';
+  const accent = '#5BD6A0';
+  const alarm = '#F2B84B';
   const paused = props.pausedAt !== null;
   const done = !paused && environment.isStale === true;
 
-  const interval = { lower: new Date(props.startedAt), upper: new Date(props.endsAt) };
-  const pauseTime = props.pausedAt === null ? undefined : new Date(props.pausedAt);
+  // iOS ignores the pause time on a live countdown, so a paused timer shows fixed text instead.
+  const pausedClock = () => {
+    const total = Math.max(0, Math.ceil((props.endsAt - (props.pausedAt ?? 0)) / 1000));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = String(total % 60).padStart(2, '0');
+    return hours > 0
+      ? `${hours}:${String(minutes).padStart(2, '0')}:${seconds}`
+      : `${minutes}:${seconds}`;
+  };
 
-  const clock = (size: number, width?: number) =>
-    done ? (
-      <Text modifiers={[font({ size, weight: 'semibold' }), foregroundStyle(alarm)]}>Done</Text>
-    ) : (
+  const clock = (size: number, width?: number) => {
+    const style = [
+      font({ size, weight: 'semibold', design: 'rounded' }),
+      monospacedDigit(),
+      multilineTextAlignment('trailing'),
+      // A countdown Text otherwise takes all the width it can get.
+      ...(width ? [frame({ width })] : []),
+    ];
+    if (done) return <Text modifiers={[...style, foregroundStyle(alarm)]}>Done</Text>;
+    if (paused) return <Text modifiers={[...style, foregroundStyle(muted)]}>{pausedClock()}</Text>;
+    return (
       <Text
-        timerInterval={interval}
-        pauseTime={pauseTime}
+        timerInterval={{ lower: new Date(props.startedAt), upper: new Date(props.endsAt) }}
         countsDown
-        modifiers={[
-          font({ size, weight: 'semibold', design: 'rounded' }),
-          monospacedDigit(),
-          foregroundStyle(accent),
-          multilineTextAlignment('trailing'),
-          // A timer Text otherwise takes all the width it can get.
-          ...(width ? [frame({ width })] : []),
-        ]}
+        modifiers={[...style, foregroundStyle(accent)]}
       />
     );
+  };
 
+  const caption = [font({ textStyle: 'subheadline' }), foregroundStyle(muted)];
   const status = done ? (
     <Text modifiers={[font({ textStyle: 'subheadline' }), foregroundStyle(alarm)]}>
       {"Time's up"}
     </Text>
   ) : paused ? (
-    <Text modifiers={[font({ textStyle: 'subheadline' })]}>Paused</Text>
+    <Text modifiers={caption}>Paused</Text>
   ) : (
     <HStack spacing={4}>
-      <Text modifiers={[font({ textStyle: 'subheadline' })]}>Ends at</Text>
-      <Text
-        date={new Date(props.endsAt)}
-        dateStyle="time"
-        modifiers={[font({ textStyle: 'subheadline' })]}
-      />
+      <Text modifiers={caption}>Ends at</Text>
+      <Text date={new Date(props.endsAt)} dateStyle="time" modifiers={caption} />
     </HStack>
   );
 
   const label = (
-    <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>{props.label}</Text>
+    <Text modifiers={[font({ textStyle: 'headline' }), foregroundStyle(text), lineLimit(1)]}>
+      {props.label}
+    </Text>
   );
-
-  const bar =
-    done || paused ? null : <ProgressView timerInterval={interval} modifiers={[tint(accent)]} />;
 
   const icon = <Image systemName={done ? 'bell.fill' : 'timer'} color={done ? alarm : accent} />;
 
   return {
     banner: (
-      <VStack spacing={8} modifiers={[padding({ all: 16 })]}>
-        <HStack>
-          <VStack alignment="leading" spacing={2}>
-            {label}
-            {status}
-          </VStack>
-          <Spacer />
-          {clock(40)}
-        </HStack>
-        {bar}
-      </VStack>
+      <HStack modifiers={[padding({ all: 16 }), activityBackgroundTint('#16201B')]}>
+        <VStack alignment="leading" spacing={2}>
+          {label}
+          {status}
+        </VStack>
+        <Spacer />
+        {clock(40)}
+      </HStack>
     ),
     compactLeading: icon,
     compactTrailing: clock(15, 56),
@@ -108,7 +112,6 @@ const TimerActivity = (props: TimerActivityProps, environment: LiveActivityEnvir
       </VStack>
     ),
     expandedTrailing: <VStack modifiers={[padding({ trailing: 8 })]}>{clock(32, 120)}</VStack>,
-    expandedBottom: bar ? <VStack modifiers={[padding({ horizontal: 8 })]}>{bar}</VStack> : null,
   };
 };
 

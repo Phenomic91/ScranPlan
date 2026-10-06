@@ -29,8 +29,10 @@ has no `timerSeconds`.
 - Each running timer has one scheduled local notification (`expo-notifications`) with the alarm
   sound in `assets/sounds/timer-done.wav`. Pause, resume and +1 min reschedule it.
 - Each timer has one Live Activity (`expo-widgets`, layout in `timer-activity.tsx`). iOS draws
-  the countdown itself. The activity's `staleDate` is the end time, which is how it shows "Done"
-  without the app.
+  the countdown itself, stopping at 0:00. The activity's `staleDate` is the end time, which is
+  how it shows "Done" without the app; iOS picks when to redraw, so that can lag the alarm by
+  up to a minute. A paused timer shows fixed text, because iOS ignores the pause time on a live
+  countdown.
 - When the app opens or comes to the front, finished countdowns leave the lock screen and any
   countdown without a timer is ended (`tidyTimers`).
 

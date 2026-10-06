@@ -21,6 +21,7 @@ describe('timer', () => {
     expect(isDone(pasta, START + 599_999)).toBe(false);
     expect(isDone(pasta, START + 600_000)).toBe(true);
     expect(remainingMs(pasta, START + 700_000)).toBe(0);
+    expect(remainingMs(pasta, START - 60_000)).toBe(600_000);
   });
 
   it('holds its time while paused and carries on when resumed', () => {

@@ -7,8 +7,14 @@ export function useNow(ticking: boolean): number {
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     if (!ticking) return;
-    const interval = setInterval(() => setNow(Date.now()), 250);
-    return () => clearInterval(interval);
+    const tick = () => setNow(Date.now());
+    // Catch up at once: `now` may be from long before the first timer started.
+    const first = setTimeout(tick, 0);
+    const interval = setInterval(tick, 250);
+    return () => {
+      clearTimeout(first);
+      clearInterval(interval);
+    };
   }, [ticking]);
   return now;
 }

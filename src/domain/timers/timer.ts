@@ -19,8 +19,9 @@ export function createTimer(id: string, label: string, seconds: number, now: num
   return { id, label, durationMs, endsAt: now + durationMs, pausedAt: null };
 }
 
+/** Never more than the full length, so a slightly stale `now` can't show extra time. */
 export function remainingMs(timer: Timer, now: number): number {
-  return Math.max(0, timer.endsAt - (timer.pausedAt ?? now));
+  return Math.min(timer.durationMs, Math.max(0, timer.endsAt - (timer.pausedAt ?? now)));
 }
 
 export function isDone(timer: Timer, now: number): boolean {

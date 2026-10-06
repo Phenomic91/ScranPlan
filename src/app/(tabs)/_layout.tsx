@@ -21,9 +21,10 @@ export default function TabsLayout() {
       <NativeTabs.Trigger name="timers">
         <NativeTabs.Trigger.Label>Timers</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="timer" md="timer" />
-        <NativeTabs.Trigger.Badge hidden={timerCount === 0}>
-          {String(timerCount)}
-        </NativeTabs.Trigger.Badge>
+        {/* The badge's hidden prop doesn't hide it, so leave it out instead. */}
+        {timerCount > 0 ? (
+          <NativeTabs.Trigger.Badge>{String(timerCount)}</NativeTabs.Trigger.Badge>
+        ) : null}
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
