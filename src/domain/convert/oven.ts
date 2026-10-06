@@ -42,8 +42,15 @@ export function formatOvenSetting(oven: OvenSetting): string {
   return parts.join(' · ');
 }
 
-/** Converts an oven temperature on one scale into the other three. */
-export function convertOven(value: number, from: OvenScale): ConversionRow[] {
+export const GAS_MARK_RANGE = { min: 0.25, max: 9 } as const;
+
+/**
+ * Converts an oven temperature on one scale into the other three. Returns null
+ * for a gas mark that isn't on the dial, rather than snapping it to ¼ or 9.
+ */
+export function convertOven(value: number, from: OvenScale): ConversionRow[] | null {
+  if (from === 'gas' && (value < GAS_MARK_RANGE.min || value > GAS_MARK_RANGE.max)) return null;
+
   let celsius: number;
   let chartFahrenheit: number | null = null;
   if (from === 'celsius') celsius = value;

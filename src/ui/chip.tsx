@@ -51,12 +51,12 @@ const styles = StyleSheet.create({
   chip: {
     alignSelf: 'flex-start',
     justifyContent: 'center',
-    minHeight: 28,
+    minHeight: 36,
     paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
     borderWidth: 1,
   },
-  pressable: { minHeight: 40, paddingHorizontal: spacing.lg },
+  pressable: { paddingHorizontal: spacing.lg },
   pressed: { opacity: 0.7 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

@@ -20,6 +20,22 @@ export function CookChecklist({ recipe }: { recipe: Recipe }) {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <View style={styles.actions}>
+        {recipe.steps.length > 0 ? (
+          <Button
+            label={`Go to step ${firstUndoneStep(progress.doneSteps, recipe.steps.length) + 1}`}
+            variant="secondary"
+            onPress={() => {
+              update((current) => ({
+                ...current,
+                step: firstUndoneStep(current.doneSteps, recipe.steps.length),
+              }));
+              router.back();
+            }}
+          />
+        ) : null}
+        <Button label="Clear ticks" variant="secondary" onPress={() => update(clearTicks)} />
+      </View>
       <View style={styles.heading}>
         <Text variant="heading">Ingredients</Text>
         <Text variant="caption" muted>
@@ -60,20 +76,6 @@ export function CookChecklist({ recipe }: { recipe: Recipe }) {
           />
         ))}
       </View>
-      {recipe.steps.length > 0 ? (
-        <Button
-          label={`Go to step ${firstUndoneStep(progress.doneSteps, recipe.steps.length) + 1}`}
-          variant="secondary"
-          onPress={() => {
-            update((current) => ({
-              ...current,
-              step: firstUndoneStep(current.doneSteps, recipe.steps.length),
-            }));
-            router.back();
-          }}
-        />
-      ) : null}
-      <Button label="Clear ticks" variant="secondary" onPress={() => update(clearTicks)} />
     </ScrollView>
   );
 }
@@ -81,4 +83,5 @@ export function CookChecklist({ recipe }: { recipe: Recipe }) {
 const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.md },
   heading: { gap: spacing.xs },
+  actions: { gap: spacing.sm },
 });

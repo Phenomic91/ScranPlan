@@ -78,27 +78,30 @@ export function ConverterCard({ kind, onKindChange }: ConverterCardProps) {
         </ChipRow>
       </Card>
 
-      <Results rows={convert(kind, entry)} />
+      <Results result={convert(kind, entry)} />
     </>
   );
 }
 
-function convert(kind: ConverterKind, entry: Entry): ConversionRow[] | null {
+/** The converted rows, or a message saying why there are none. */
+function convert(kind: ConverterKind, entry: Entry): ConversionRow[] | string {
   // Accept "1,5" as well as "1.5".
   const value = Number.parseFloat(entry.amount.replace(',', '.'));
-  if (!Number.isFinite(value)) return null;
-  if (kind === 'oven') return convertOven(value, entry.unit as OvenScale);
+  if (!Number.isFinite(value)) return 'Enter a number to convert.';
+  if (kind === 'oven') {
+    return convertOven(value, entry.unit as OvenScale) ?? 'Gas marks run from ¼ to 9.';
+  }
   return convertMeasure(value, entry.unit, kind === 'weight' ? WEIGHT_UNITS : VOLUME_UNITS);
 }
 
-function Results({ rows }: { rows: ConversionRow[] | null }) {
+function Results({ result }: { result: ConversionRow[] | string }) {
   const colors = useColors();
   return (
     <Card>
-      {rows === null ? (
-        <Text muted>Enter a number to convert.</Text>
+      {typeof result === 'string' ? (
+        <Text muted>{result}</Text>
       ) : (
-        rows.map((row, index) => (
+        result.map((row, index) => (
           <View
             key={row.label}
             style={[styles.row, index > 0 && { borderTopColor: colors.border, ...styles.divided }]}

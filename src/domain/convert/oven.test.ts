@@ -10,7 +10,7 @@ describe('convertOven', () => {
   });
 
   it('adds 20°C to a fan temperature for conventional ovens', () => {
-    expect(convertOven(180, 'fan')[0]).toEqual({ value: '200', label: '°C conventional' });
+    expect(convertOven(180, 'fan')?.[0]).toEqual({ value: '200', label: '°C conventional' });
   });
 
   it('uses the chart for gas marks, including fractions', () => {
@@ -27,6 +27,11 @@ describe('convertOven', () => {
       { value: '157', label: '°C fan' },
       { value: '4', label: 'Gas mark' },
     ]);
+  });
+
+  it('refuses gas marks that are not on the dial', () => {
+    expect(convertOven(200, 'gas')).toBeNull();
+    expect(convertOven(0, 'gas')).toBeNull();
   });
 
   it('says when a temperature is off the gas scale', () => {

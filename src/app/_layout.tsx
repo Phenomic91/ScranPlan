@@ -20,7 +20,7 @@ export default function RootLayout() {
         <AuthProvider>
           <SyncProvider>
             <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Recipes' }} />
               <Stack.Screen name="recipe/[id]" options={{ title: '' }} />
               <Stack.Screen
                 name="cook/[id]/index"
@@ -33,6 +33,7 @@ export default function RootLayout() {
                   headerShown: false,
                   sheetAllowedDetents: [0.6, 1],
                   sheetGrabberVisible: true,
+                  contentStyle: { backgroundColor: colors.background },
                 }}
               />
               <Stack.Screen
