@@ -1,5 +1,6 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
+import * as Linking from 'expo-linking';
 
 import { db } from '@/db/client';
 import { supabase } from '@/lib/supabase';
@@ -10,14 +11,24 @@ function requireSupabase() {
   return supabase;
 }
 
-/** Emails the user a one-time sign-in code. */
-export async function sendEmailCode(email: string): Promise<void> {
-  const { error } = await requireSupabase().auth.signInWithOtp({ email });
+/**
+ * Where the emailed sign-in link sends the user back to (scranplan://auth-callback).
+ * It must be in the Supabase project's redirect URL allow-list.
+ */
+export const SIGN_IN_LINK_RETURN_URL = Linking.createURL('auth-callback');
+
+/** Emails the user a sign-in link that opens the app (see src/app/auth-callback.tsx). */
+export async function sendSignInLink(email: string): Promise<void> {
+  const { error } = await requireSupabase().auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: SIGN_IN_LINK_RETURN_URL },
+  });
   if (error) throw error;
 }
 
-export async function verifyEmailCode(email: string, code: string): Promise<void> {
-  const { error } = await requireSupabase().auth.verifyOtp({ email, token: code, type: 'email' });
+/** Completes a sign-in link: swaps the one-time code in the link for a session. */
+export async function finishSignInLink(code: string): Promise<void> {
+  const { error } = await requireSupabase().auth.exchangeCodeForSession(code);
   if (error) throw error;
 }
 

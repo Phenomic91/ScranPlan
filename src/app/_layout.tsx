@@ -27,6 +27,7 @@ export default function RootLayout() {
                 options={{ title: 'New recipe', presentation: 'modal' }}
               />
               <Stack.Screen name="sign-in" options={{ title: 'Sign in', presentation: 'modal' }} />
+              <Stack.Screen name="auth-callback" options={{ title: 'Signing in' }} />
             </Stack>
           </SyncProvider>
         </AuthProvider>

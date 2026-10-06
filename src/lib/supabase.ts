@@ -17,6 +17,8 @@ export const supabase =
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: false,
+          // Sign-in links carry a one-time code that only this device can redeem.
+          flowType: 'pkce',
         },
       })
     : null;

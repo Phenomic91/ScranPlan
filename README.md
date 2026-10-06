@@ -37,16 +37,19 @@ are switched off, and AI works only with your own Claude key (Settings).
    npx supabase functions deploy ai
    ```
 4. In the dashboard:
-   - **Authentication > Emails:** edit the "Magic link" and "Confirm signup"
-     templates to show the code, `{{ .Token }}` (copy
-     `supabase/templates/sign-in-code.html`).
+   - **Authentication > URL Configuration:** add `scranplan://auth-callback`
+     to Redirect URLs. Sign-in emails contain a link that opens the app there.
    - **Authentication > Sign In / Providers > Apple:** enable it and add the
      bundle id `com.scranplan.app` as a client id.
-   - For more than a few test emails an hour, add your own SMTP server
+   - Supabase's built-in email sender allows only a couple of emails an hour.
+     Before other people use the app, add your own SMTP server
      (Authentication > Emails > SMTP).
 
 Optional secret: `AI_MONTHLY_REQUESTS` (default 300) caps AI requests per user
 per month through the server key.
+
+To open a sign-in link in the iOS simulator, copy it from the email and run
+`xcrun simctl openurl booted "<link>"`.
 
 ### Local Supabase
 

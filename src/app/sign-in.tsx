@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, StyleSheet, useColorScheme } from 'react-native';
 
-import { sendEmailCode, signInWithApple, verifyEmailCode } from '@/features/auth/sign-in';
+import { sendSignInLink, signInWithApple } from '@/features/auth/sign-in';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/ui/button';
 import { MessageScreen } from '@/ui/message-screen';
@@ -15,8 +15,7 @@ import { radius } from '@/ui/theme';
 export default function SignInScreen() {
   const dark = useColorScheme() === 'dark';
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [codeSent, setCodeSent] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
   const [busy, setBusy] = useState(false);
 
   if (!supabase) {
@@ -65,44 +64,26 @@ export default function SignInScreen() {
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
-        editable={!codeSent}
+        editable={!linkSent}
       />
-      {codeSent ? (
+      {linkSent ? (
         <>
-          <TextField
-            label="6-digit code from the email"
-            value={code}
-            onChangeText={setCode}
-            autoComplete="one-time-code"
-            keyboardType="number-pad"
-            autoFocus
-          />
-          <Button
-            label="Sign in"
-            busy={busy}
-            disabled={code.trim().length < 6}
-            onPress={() =>
-              attempt(async () => {
-                await verifyEmailCode(email.trim(), code.trim());
-                return true;
-              })
-            }
-          />
+          <Text>Check your email and tap the sign-in link on this device.</Text>
           <Button
             label="Use a different email"
             variant="secondary"
-            onPress={() => setCodeSent(false)}
+            onPress={() => setLinkSent(false)}
           />
         </>
       ) : (
         <Button
-          label="Email me a code"
+          label="Email me a sign-in link"
           busy={busy}
           disabled={!email.includes('@')}
           onPress={() =>
             attempt(async () => {
-              await sendEmailCode(email.trim());
-              setCodeSent(true);
+              await sendSignInLink(email.trim());
+              setLinkSent(true);
               return false;
             })
           }
