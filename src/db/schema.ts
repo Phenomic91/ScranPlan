@@ -36,3 +36,18 @@ export const syncState = sqliteTable('sync_state', {
   tableName: text('table_name').primaryKey(),
   lastPulledAt: text('last_pulled_at').notNull(),
 });
+
+/** Kitchen timers. Device-only, never synced: a timer belongs to the phone it rings on. */
+export const timers = sqliteTable('timers', {
+  id: text('id').primaryKey(),
+  label: text('label').notNull(),
+  /** Times are milliseconds since the epoch; see src/domain/timers/timer.ts. */
+  durationMs: integer('duration_ms').notNull(),
+  endsAt: integer('ends_at').notNull(),
+  pausedAt: integer('paused_at'),
+  /** The scheduled end-of-timer alarm, so it can be cancelled or moved. */
+  notificationId: text('notification_id'),
+  /** The lock-screen Live Activity showing this timer. */
+  activityId: text('activity_id'),
+  createdAt: integer('created_at').notNull(),
+});
