@@ -21,10 +21,10 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
   );
 }
 
-/** "25 min · serves 2 · vegetarian" */
-export function recipeSummary(recipe: Recipe): string {
+/** "25 min · serves 2 · vegetarian". Imported recipes can lack a time, shown as 0. */
+export function recipeSummary(recipe: Pick<Recipe, 'minutes' | 'serves' | 'vegetarian'>): string {
   return [
-    `${recipe.minutes} min`,
+    recipe.minutes ? `${recipe.minutes} min` : null,
     `serves ${recipe.serves}`,
     recipe.vegetarian ? 'vegetarian' : null,
   ]
