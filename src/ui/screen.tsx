@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,15 +9,18 @@ type ScreenProps = {
   /** Shown as a large title on screens that have no navigation header (the tab roots). */
   title?: string;
   children: ReactNode;
+  /** For screens that need to scroll themselves, such as to a field above the keyboard. */
+  ref?: Ref<ScrollView>;
 };
 
 /** Scrollable page body with the app background and standard padding. */
-export function Screen({ title, children }: ScreenProps) {
+export function Screen({ title, children, ref }: ScreenProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
   return (
     <ScrollView
+      ref={ref}
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={[
         styles.content,

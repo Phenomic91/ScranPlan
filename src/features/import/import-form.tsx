@@ -16,10 +16,12 @@ type ImportFormProps = {
   /** The last failed import, shown in the card it came from. */
   error: { kind: ImportKind; message: string } | null;
   onRead: (kind: ImportKind, input: string) => void;
+  /** Called when the recipe text box gains focus; it is the last thing on the page. */
+  onTextFocus: () => void;
 };
 
 /** The two ways in: paste a link, or paste the recipe's text. */
-export function ImportForm({ busy, error, onRead }: ImportFormProps) {
+export function ImportForm({ busy, error, onRead, onTextFocus }: ImportFormProps) {
   const colors = useColors();
   const [link, setLink] = useState('');
   const [text, setText] = useState('');
@@ -88,6 +90,7 @@ export function ImportForm({ busy, error, onRead }: ImportFormProps) {
           value={text}
           onChangeText={setText}
           placeholder="Paste the ingredients and method here"
+          onFocus={onTextFocus}
           multiline
         />
         <Button

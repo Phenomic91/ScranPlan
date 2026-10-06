@@ -1,5 +1,6 @@
 import { router, Stack } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Keyboard, type ScrollView } from 'react-native';
 
 import { ImportError } from '@/features/import/import-error';
 import { ImportForm, type ImportKind } from '@/features/import/import-form';
@@ -18,6 +19,18 @@ export default function ImportScreen() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draft, setDraft] = useState<RecipeDraft | null>(null);
   const [saving, setSaving] = useState(false);
+  const screen = useRef<ScrollView>(null);
+
+  // iOS only scrolls the top of a tall text box above the keyboard, which leaves
+  // the caret and the Read button hidden. The box is last, so scroll to the end.
+  const showTextBox = () => {
+    const scrollToEnd = () => screen.current?.scrollToEnd({ animated: true });
+    if (Keyboard.isVisible()) return scrollToEnd();
+    const shown = Keyboard.addListener('keyboardDidShow', () => {
+      shown.remove();
+      scrollToEnd();
+    });
+  };
 
   const read = async (kind: ImportKind, input: string) => {
     setBusy(kind);
@@ -57,9 +70,9 @@ export default function ImportScreen() {
 
   if (!draft) {
     return (
-      <Screen>
+      <Screen ref={screen}>
         {cancel}
-        <ImportForm busy={busy} error={readError} onRead={read} />
+        <ImportForm busy={busy} error={readError} onRead={read} onTextFocus={showTextBox} />
       </Screen>
     );
   }
