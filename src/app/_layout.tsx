@@ -20,7 +20,8 @@ export default function RootLayout() {
         <AuthProvider>
           <SyncProvider>
             <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              {/* The title is the back button label on pushed screens; without it, "(tabs)" shows. */}
+              <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Recipes' }} />
               <Stack.Screen name="recipe/[id]" options={{ title: '' }} />
               <Stack.Screen
                 name="recipe/new"

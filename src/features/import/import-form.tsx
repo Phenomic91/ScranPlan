@@ -1,26 +1,40 @@
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet } from 'react-native';
 
 import { Button } from '@/ui/button';
 import { Card } from '@/ui/card';
 import { Text } from '@/ui/text';
 import { TextField } from '@/ui/text-field';
-import { spacing, useColors } from '@/ui/theme';
+import { useColors } from '@/ui/theme';
 
 export type ImportKind = 'link' | 'text';
 
 type ImportFormProps = {
   /** Which import is running, if any. */
   busy: ImportKind | null;
+  /** The last failed import, shown in the card it came from. */
+  error: { kind: ImportKind; message: string } | null;
   onRead: (kind: ImportKind, input: string) => void;
 };
 
 /** The two ways in: paste a link, or paste the recipe's text. */
-export function ImportForm({ busy, onRead }: ImportFormProps) {
+export function ImportForm({ busy, error, onRead }: ImportFormProps) {
   const colors = useColors();
   const [link, setLink] = useState('');
   const [text, setText] = useState('');
+
+  // The keyboard would otherwise hide the progress and any error.
+  const read = (kind: ImportKind, input: string) => {
+    Keyboard.dismiss();
+    onRead(kind, input);
+  };
+
+  const status = (kind: ImportKind) => {
+    if (busy === kind) return <Text muted>Reading the recipe. This can take up to a minute.</Text>;
+    if (error?.kind === kind) return <Text style={{ color: colors.danger }}>{error.message}</Text>;
+    return null;
+  };
 
   return (
     <>
@@ -38,7 +52,7 @@ export function ImportForm({ busy, onRead }: ImportFormProps) {
             onPress={(data) => {
               if (data.type !== 'text' || busy) return;
               setLink(data.text);
-              onRead('link', data.text);
+              read('link', data.text);
             }}
           />
         ) : null}
@@ -51,15 +65,16 @@ export function ImportForm({ busy, onRead }: ImportFormProps) {
           autoCorrect={false}
           keyboardType="url"
           returnKeyType="go"
-          onSubmitEditing={() => link.trim() && onRead('link', link)}
+          onSubmitEditing={() => link.trim() && read('link', link)}
         />
         <Button
           label="Read link"
           variant="secondary"
           busy={busy === 'link'}
           disabled={!link.trim() || busy !== null}
-          onPress={() => onRead('link', link)}
+          onPress={() => read('link', link)}
         />
+        {status('link')}
       </Card>
 
       <Card>
@@ -80,20 +95,14 @@ export function ImportForm({ busy, onRead }: ImportFormProps) {
           variant="secondary"
           busy={busy === 'text'}
           disabled={!text.trim() || busy !== null}
-          onPress={() => onRead('text', text)}
+          onPress={() => read('text', text)}
         />
+        {status('text')}
       </Card>
-
-      {busy ? (
-        <View style={styles.status}>
-          <Text muted>Reading the recipe. This can take up to a minute.</Text>
-        </View>
-      ) : null}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   pasteButton: { height: 48, width: 140 },
-  status: { paddingHorizontal: spacing.xs },
 });

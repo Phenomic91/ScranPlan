@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 
 import { ImportError } from '@/features/import/import-error';
@@ -14,17 +14,18 @@ import { useColors } from '@/ui/theme';
 export default function ImportScreen() {
   const colors = useColors();
   const [busy, setBusy] = useState<ImportKind | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [readError, setReadError] = useState<{ kind: ImportKind; message: string } | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [draft, setDraft] = useState<RecipeDraft | null>(null);
   const [saving, setSaving] = useState(false);
 
   const read = async (kind: ImportKind, input: string) => {
     setBusy(kind);
-    setError(null);
+    setReadError(null);
     try {
       setDraft(await (kind === 'link' ? importFromLink(input) : importFromText(input)));
     } catch (caught) {
-      setError(errorMessage(caught));
+      setReadError({ kind, message: errorMessage(caught) });
     } finally {
       setBusy(null);
     }
@@ -37,26 +38,37 @@ export default function ImportScreen() {
       const id = await addRecipe({ ...draft, name: draft.name.trim() });
       router.replace({ pathname: '/recipe/[id]', params: { id } });
     } catch (caught) {
-      setError(errorMessage(caught));
+      setSaveError(errorMessage(caught));
       setSaving(false);
     }
   };
 
-  const errorText = error ? <Text style={{ color: colors.danger }}>{error}</Text> : null;
+  const cancel = (
+    <Stack.Screen
+      options={{
+        headerLeft: () => (
+          <Text style={{ color: colors.accent }} onPress={() => router.back()}>
+            Cancel
+          </Text>
+        ),
+      }}
+    />
+  );
 
   if (!draft) {
     return (
       <Screen>
-        <ImportForm busy={busy} onRead={read} />
-        {errorText}
+        {cancel}
+        <ImportForm busy={busy} error={readError} onRead={read} />
       </Screen>
     );
   }
 
   return (
     <Screen>
+      {cancel}
       <RecipePreview draft={draft} onRename={(name) => setDraft({ ...draft, name })} />
-      {errorText}
+      {saveError ? <Text style={{ color: colors.danger }}>{saveError}</Text> : null}
       <Button label="Save recipe" onPress={save} busy={saving} disabled={!draft.name.trim()} />
       <Button label="Start again" variant="secondary" onPress={() => setDraft(null)} />
     </Screen>
@@ -66,5 +78,5 @@ export default function ImportScreen() {
 function errorMessage(error: unknown): string {
   if (error instanceof ImportError) return error.message;
   const detail = error instanceof Error ? ` (${error.message})` : '';
-  return `Something went wrong reading the recipe${detail}. Try again.`;
+  return `Something went wrong${detail}. Try again.`;
 }

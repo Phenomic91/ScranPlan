@@ -25,6 +25,8 @@ export function Screen({ title, children }: ScreenProps) {
       ]}
       contentInsetAdjustmentBehavior={title ? 'never' : 'automatic'}
       keyboardShouldPersistTaps="handled"
+      // Scrolls a focused text box above the keyboard instead of typing blind behind it.
+      automaticallyAdjustKeyboardInsets
     >
       {title ? <Text variant="title">{title}</Text> : null}
       {children}
