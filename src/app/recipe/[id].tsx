@@ -1,12 +1,16 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
-import { formatAmount, scaleIngredient } from '@/domain/recipes/quantities';
+import { formatOvenSetting } from '@/domain/convert/oven';
+import type { Recipe } from '@/domain/recipes/recipe';
+import { useCookProgress } from '@/features/cook/cook-progress-store';
+import { ingredientText, scaledIngredients } from '@/features/cook/scaled-ingredients';
+import { StepTimerChip } from '@/features/cook/step-timer-chip';
 import { recipeSummary } from '@/features/recipes/recipe-card';
 import { deleteRecipe, isStarterRecipe, useRecipe } from '@/features/recipes/recipes-store';
 import { Button } from '@/ui/button';
 import { Card } from '@/ui/card';
+import { Chip, ChipRow } from '@/ui/chip';
 import { MessageScreen } from '@/ui/message-screen';
 import { Screen } from '@/ui/screen';
 import { Text } from '@/ui/text';
@@ -15,10 +19,14 @@ import { spacing } from '@/ui/theme';
 export default function RecipeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const recipe = useRecipe(id);
-  const [serves, setServes] = useState<number | null>(null);
+  return recipe ? <RecipeDetail recipe={recipe} /> : <MessageScreen title="Recipe not found" />;
+}
 
-  if (!recipe) return <MessageScreen title="Recipe not found" />;
-  const cooking = serves ?? recipe.serves;
+function RecipeDetail({ recipe }: { recipe: Recipe }) {
+  // Servings are shared with cook mode, so the amounts there match.
+  const [progress, update] = useCookProgress(recipe);
+  const cooking = progress.serves ?? recipe.serves;
+  const setServes = (serves: number) => update((current) => ({ ...current, serves }));
 
   const confirmDelete = () =>
     Alert.alert(`Delete ${recipe.name}?`, 'It will be removed from all your devices.', [
@@ -41,6 +49,17 @@ export default function RecipeScreen() {
         {recipeSummary(recipe)}
       </Text>
       {recipe.blurb ? <Text muted>{recipe.blurb}</Text> : null}
+      {recipe.oven ? (
+        <ChipRow>
+          <Chip label={`Oven ${formatOvenSetting(recipe.oven)}`} />
+        </ChipRow>
+      ) : null}
+      {recipe.steps.length > 0 ? (
+        <Button
+          label="Cook"
+          onPress={() => router.push({ pathname: '/cook/[id]', params: { id: recipe.id } })}
+        />
+      ) : null}
 
       <Card>
         <View style={styles.servesRow}>
@@ -56,11 +75,9 @@ export default function RecipeScreen() {
             <Button label="+" variant="secondary" onPress={() => setServes(cooking + 1)} />
           </View>
         </View>
-        {recipe.ingredients.map((item, index) => {
-          const scaled = scaleIngredient(item, recipe.serves, cooking);
-          const amount = formatAmount(scaled.amount, scaled.unit);
-          return <Text key={index}>{amount ? `${amount} ${scaled.name}` : scaled.name}</Text>;
-        })}
+        {scaledIngredients(recipe, cooking).map((line, index) => (
+          <Text key={index}>{ingredientText(line)}</Text>
+        ))}
       </Card>
 
       <Card>
@@ -71,6 +88,7 @@ export default function RecipeScreen() {
               {step.title}
             </Text>
             <Text>{step.text}</Text>
+            <StepTimerChip recipe={recipe} step={step} />
           </View>
         ))}
       </Card>

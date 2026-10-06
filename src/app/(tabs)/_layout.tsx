@@ -10,6 +10,10 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Label>Recipes</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="fork.knife" md="restaurant" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="convert">
+        <NativeTabs.Trigger.Label>Convert</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="arrow.left.arrow.right" md="swap_horiz" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />
