@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { formatAmount, scaleIngredient } from '@/domain/recipes/quantities';
+import { SourceLine } from '@/features/import/source-line';
 import { recipeSummary } from '@/features/recipes/recipe-card';
 import { deleteRecipe, isStarterRecipe, useRecipe } from '@/features/recipes/recipes-store';
 import { Button } from '@/ui/button';
@@ -41,6 +42,7 @@ export default function RecipeScreen() {
         {recipeSummary(recipe)}
       </Text>
       {recipe.blurb ? <Text muted>{recipe.blurb}</Text> : null}
+      {recipe.source ? <SourceLine source={recipe.source} /> : null}
 
       <Card>
         <View style={styles.servesRow}>

@@ -26,6 +26,10 @@ export default function RootLayout() {
                 name="recipe/new"
                 options={{ title: 'New recipe', presentation: 'modal' }}
               />
+              <Stack.Screen
+                name="import"
+                options={{ title: 'Import a recipe', presentation: 'modal' }}
+              />
               <Stack.Screen name="sign-in" options={{ title: 'Sign in', presentation: 'modal' }} />
               <Stack.Screen name="auth-callback" options={{ title: 'Signing in' }} />
             </Stack>

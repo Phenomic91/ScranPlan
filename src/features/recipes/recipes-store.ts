@@ -59,6 +59,6 @@ export async function deleteRecipe(id: string): Promise<void> {
 }
 
 function toRecipe(row: typeof recipes.$inferSelect): Recipe {
-  const { createdAt, clientUpdatedAt, deletedAt, dirty, ...recipe } = row;
-  return { ...recipe, oven: recipe.oven ?? null };
+  const { createdAt, clientUpdatedAt, deletedAt, dirty, source, ...recipe } = row;
+  return { ...recipe, oven: recipe.oven ?? null, source: source ?? undefined };
 }

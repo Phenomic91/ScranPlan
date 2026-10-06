@@ -1,6 +1,6 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-import type { Ingredient, OvenSetting, Step } from '@/domain/recipes/recipe';
+import type { Ingredient, OvenSetting, RecipeSource, Step } from '@/domain/recipes/recipe';
 
 /**
  * Columns every synced table carries. Timestamps are ISO-8601 strings so they
@@ -27,6 +27,7 @@ export const recipes = sqliteTable('recipes', {
   ingredients: text('ingredients', { mode: 'json' }).$type<Ingredient[]>().notNull(),
   steps: text('steps', { mode: 'json' }).$type<Step[]>().notNull(),
   note: text('note').notNull(),
+  source: text('source', { mode: 'json' }).$type<RecipeSource | null>(),
   createdAt: text('created_at').notNull(),
   ...syncColumns,
 });
