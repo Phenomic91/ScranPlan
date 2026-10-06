@@ -39,8 +39,10 @@ are switched off, and AI works only with your own Claude key (Settings).
 4. In the dashboard:
    - **Authentication > URL Configuration:** add `scranplan://auth-callback`
      to Redirect URLs. Sign-in emails contain a link that opens the app there.
-   - **Authentication > Sign In / Providers > Apple:** enable it and add the
-     bundle id `com.scranplan.app` as a client id.
+   - **Sign in with Apple** is off until there is a paid Apple Developer
+     Program membership. To turn it on, set `appleSignIn` in `app.config.ts`,
+     then in **Authentication > Sign In / Providers > Apple** enable it and add
+     the bundle id `com.scranplan.app` as a client id.
    - Supabase's built-in email sender allows only a couple of emails an hour.
      Before other people use the app, add your own SMTP server
      (Authentication > Emails > SMTP).
