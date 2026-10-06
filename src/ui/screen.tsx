@@ -27,6 +27,7 @@ export function Screen({ title, children }: ScreenProps) {
       keyboardShouldPersistTaps="handled"
       // Scrolls a focused text box above the keyboard instead of typing blind behind it.
       automaticallyAdjustKeyboardInsets
+      keyboardDismissMode="interactive"
     >
       {title ? <Text variant="title">{title}</Text> : null}
       {children}
