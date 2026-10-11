@@ -7,6 +7,8 @@ import { ingredientsForStep } from '@/domain/cook/step-ingredients';
 import type { Recipe } from '@/domain/recipes/recipe';
 import { Button } from '@/ui/button';
 import { Chip, ChipRow } from '@/ui/chip';
+import { NextTimerStrip } from '@/features/timers/next-timer-strip';
+import { useTimers } from '@/features/timers/timers-store';
 import { MessageScreen } from '@/ui/message-screen';
 import { Text } from '@/ui/text';
 import { radius, spacing, useColors } from '@/ui/theme';
@@ -22,6 +24,7 @@ export function CookView({ recipe }: { recipe: Recipe }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [progress, update] = useCookProgress(recipe);
+  const hasTimers = useTimers().length > 0;
 
   const index = progress.step;
   const step = recipe.steps[index];
@@ -87,6 +90,17 @@ export function CookView({ recipe }: { recipe: Recipe }) {
         ) : null}
       </ScrollView>
 
+      {hasTimers ? (
+        <View
+          style={[
+            styles.timerStrip,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <NextTimerStrip linked={false} />
+        </View>
+      ) : null}
+
       <View
         style={[
           styles.footer,
@@ -130,4 +144,9 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   footerButton: { flex: 1 },
+  timerStrip: {
+    minHeight: 48,
+    flexDirection: 'row',
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
 });

@@ -16,11 +16,13 @@ Everything goes through `src/features/timers/timers-store.ts`:
 | `useTimers()`                        | Every timer, oldest first, live.                                                    |
 
 `NextTimerStrip` (`src/features/timers/next-timer-strip.tsx`) is the one-line "next timer due"
-strip; the tabs show it above the tab bar, and cook mode can show it too.
+strip; the tabs show it above the tab bar, and cook mode shows it above its Back and Next buttons
+(`linked={false}`, so a tap doesn't leave cook mode).
 
-Label step timers `<recipe short name> · <step title>`, for example `Pasta · Simmer the sauce`.
-`parseStepSeconds` in `src/domain/timers/step-time.ts` reads a time from step text when a step
-has no `timerSeconds`.
+Recipe steps start timers through `StepTimerChip` (`src/features/cook/step-timer-chip.tsx`),
+labelled `<recipe short name> · <step title>`, for example `Pasta · Simmer the sauce`. When a step
+has no `timerSeconds`, `parseStepSeconds` in `src/domain/timers/step-time.ts` reads a time from
+its text.
 
 ## How it works
 
