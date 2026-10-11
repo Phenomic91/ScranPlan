@@ -6,11 +6,17 @@ import { withEntitlementsPlist, type ConfigPlugin } from 'expo/config-plugins';
 
 const bundleIdentifier = 'com.scranplan.app';
 
-// expo-notifications adds the push entitlement, which a free Apple account can't sign. Timer
-// alarms are local notifications and don't need it. Remove this once there is a server push.
-const withoutPushEntitlement: ConfigPlugin = (config) =>
+// Sign in with Apple needs a paid Apple Developer Program membership. While it's off, the
+// app has no Apple sign-in entitlement and builds sign with a free personal team.
+const appleSignIn = false;
+
+// Entitlements a free Apple account can't sign. expo-notifications adds push, but timer alarms
+// are local notifications and don't need it; remove it once there is a server push. Prebuild
+// adds Sign in with Apple whenever expo-apple-authentication is installed.
+const withoutPaidEntitlements: ConfigPlugin = (config) =>
   withEntitlementsPlist(config, (config) => {
     delete config.modResults['aps-environment'];
+    if (!appleSignIn) delete config.modResults['com.apple.developer.applesignin'];
     return config;
   });
 
@@ -26,7 +32,7 @@ const config: ExpoConfig = {
     bundleIdentifier,
     buildNumber: '1',
     icon: './assets/expo.icon',
-    usesAppleSignIn: true,
+    usesAppleSignIn: appleSignIn,
   },
   android: {
     package: 'com.scranplan.app',
@@ -43,7 +49,7 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-sqlite',
     'expo-secure-store',
-    'expo-apple-authentication',
+    ...(appleSignIn ? ['expo-apple-authentication'] : []),
     ['expo-notifications', { sounds: ['./assets/sounds/timer-done.wav'] }],
     // Lock-screen timer countdowns (Live Activities). The App Group lets the app and the
     // widget extension share data; free Apple accounts can sign it.
@@ -71,4 +77,4 @@ const config: ExpoConfig = {
   },
 };
 
-export default withoutPushEntitlement(config);
+export default withoutPaidEntitlements(config);

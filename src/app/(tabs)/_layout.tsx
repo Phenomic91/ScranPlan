@@ -26,6 +26,10 @@ export default function TabsLayout() {
           <NativeTabs.Trigger.Badge>{String(timerCount)}</NativeTabs.Trigger.Badge>
         ) : null}
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="convert">
+        <NativeTabs.Trigger.Label>Convert</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="arrow.left.arrow.right" md="swap_horiz" />
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />
