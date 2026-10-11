@@ -74,7 +74,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         lastSyncedAt.current = new Date();
         setStatus({ state: 'idle', lastSyncedAt: lastSyncedAt.current });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = errorMessage(error);
         setStatus({ state: 'failed', lastSyncedAt: lastSyncedAt.current, message });
       } finally {
         running.current = null;
@@ -109,4 +109,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     [userId, status, syncNow],
   );
   return <SyncContext value={value}>{children}</SyncContext>;
+}
+
+/** Supabase returns plain objects with a message, not Error instances. */
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String(error.message);
+  }
+  return String(error);
 }
