@@ -1,20 +1,5 @@
+import { FAN_OFFSET, formatGasMark, GAS_MARKS } from '@/domain/convert/oven';
 import type { OvenSetting } from '@/domain/recipes/recipe';
-
-/** Conventional °C for each gas mark. */
-const GAS_MARKS: [mark: string, celsius: number][] = [
-  ['¼', 110],
-  ['½', 130],
-  ['1', 140],
-  ['2', 150],
-  ['3', 170],
-  ['4', 180],
-  ['5', 190],
-  ['6', 200],
-  ['6½', 210],
-  ['7', 220],
-  ['8', 230],
-  ['9', 240],
-];
 
 const TEMPERATURE = /(\d{2,3})\s*(?:°|º|degrees?)?\s*(C|F)\b(\s*\(?\s*fan)?/gi;
 const FAN_FIRST = /\bfan\s*(?:oven\s*)?(\d{2,3})\s*(?:°|º)?\s*C\b/i;
@@ -48,11 +33,11 @@ function readSetting(sentence: string): OvenSetting | null {
   }
   const gas = GAS_MARK.exec(sentence)?.[1]?.replace(/\s+/g, '') ?? null;
 
-  celsius ??= fan !== null ? fan + 20 : gasToCelsius(gas);
+  celsius ??= fan !== null ? fan + FAN_OFFSET : gasToCelsius(gas);
   if (celsius === null || celsius < 90 || celsius > 300) return null;
   return {
     celsius,
-    fanCelsius: fan ?? celsius - 20,
+    fanCelsius: fan ?? celsius - FAN_OFFSET,
     gasMark: gas ?? celsiusToGas(celsius),
   };
 }
@@ -61,13 +46,18 @@ function fahrenheitToCelsius(fahrenheit: number): number {
   return Math.round(((fahrenheit - 32) * 5) / 9 / 10) * 10;
 }
 
+const VULGAR: Record<string, number> = { '¼': 0.25, '½': 0.5 };
+
 function gasToCelsius(mark: string | null): number | null {
-  return GAS_MARKS.find(([gas]) => gas === mark)?.[1] ?? null;
+  if (mark === null) return null;
+  const value = /^(\d*)([¼½])?$/.exec(mark);
+  const number = Number(value?.[1] || 0) + (VULGAR[value?.[2] ?? ''] ?? 0);
+  return GAS_MARKS.find((row) => row.mark === number)?.celsius ?? null;
 }
 
 function celsiusToGas(celsius: number): string {
-  const nearest = GAS_MARKS.reduce((best, entry) =>
-    Math.abs(entry[1] - celsius) < Math.abs(best[1] - celsius) ? entry : best,
+  const nearest = GAS_MARKS.reduce((best, row) =>
+    Math.abs(row.celsius - celsius) < Math.abs(best.celsius - celsius) ? row : best,
   );
-  return nearest[0];
+  return formatGasMark(nearest.mark);
 }

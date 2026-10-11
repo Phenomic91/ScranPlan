@@ -26,8 +26,20 @@ export const scranplanRoute: AiRoute = {
     if (error instanceof FunctionsHttpError && error.context.status === 429) {
       throw new AiAllowanceUsedError("You've used this month's AI allowance.");
     }
+    if (error instanceof FunctionsHttpError) {
+      throw new Error(`ScranPlan's AI server failed: ${await serverReason(error.context)}`);
+    }
     if (error) throw error;
     if (!data) throw new Error('The server returned no answer.');
     return data.text;
   },
 };
+
+/** The function answers errors as { error }; a crash before that leaves only the status. */
+async function serverReason(response: Response): Promise<string> {
+  const body: unknown = await response.json().catch(() => null);
+  if (body && typeof body === 'object' && 'error' in body && typeof body.error === 'string') {
+    return body.error;
+  }
+  return `error ${response.status}`;
+}

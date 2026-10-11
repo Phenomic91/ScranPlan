@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native';
 
 import { DatabaseGate } from '@/db/database-gate';
 import { AuthProvider } from '@/features/auth/auth-provider';
+import { TimerHousekeeping } from '@/features/timers/timers-store';
 import { SyncProvider } from '@/sync/sync-provider';
 import { useColors } from '@/ui/theme';
 
@@ -17,12 +18,26 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={theme}>
       <DatabaseGate>
+        <TimerHousekeeping />
         <AuthProvider>
           <SyncProvider>
             <Stack>
-              {/* The title is the back button label on pushed screens; without it, "(tabs)" shows. */}
               <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Recipes' }} />
               <Stack.Screen name="recipe/[id]" options={{ title: '' }} />
+              <Stack.Screen
+                name="cook/[id]/index"
+                options={{ presentation: 'fullScreenModal', title: '' }}
+              />
+              <Stack.Screen
+                name="cook/[id]/ingredients"
+                options={{
+                  presentation: 'formSheet',
+                  headerShown: false,
+                  sheetAllowedDetents: [0.6, 1],
+                  sheetGrabberVisible: true,
+                  contentStyle: { backgroundColor: colors.background },
+                }}
+              />
               <Stack.Screen
                 name="recipe/new"
                 options={{ title: 'New recipe', presentation: 'modal' }}

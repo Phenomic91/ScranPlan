@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
+import { formatOvenSetting } from '@/domain/convert/oven';
 import { formatAmount } from '@/domain/recipes/quantities';
 import { recipeSummary } from '@/features/recipes/recipe-card';
 import type { RecipeDraft } from '@/features/recipes/recipes-store';
@@ -28,10 +29,7 @@ export function RecipePreview({ draft, onRename }: RecipePreviewProps) {
 
       <TextField label="Name" value={draft.name} onChangeText={onRename} />
       <Text variant="caption" muted>
-        {[
-          recipeSummary(draft),
-          oven ? `oven ${oven.celsius}°C, ${oven.fanCelsius}°C fan, gas ${oven.gasMark}` : null,
-        ]
+        {[recipeSummary(draft), oven ? `oven ${formatOvenSetting(oven)}` : null]
           .filter(Boolean)
           .join(' · ')}
       </Text>
