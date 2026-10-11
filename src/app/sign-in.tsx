@@ -1,4 +1,5 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, StyleSheet, useColorScheme } from 'react-native';
@@ -11,6 +12,8 @@ import { Screen } from '@/ui/screen';
 import { Text } from '@/ui/text';
 import { TextField } from '@/ui/text-field';
 import { radius } from '@/ui/theme';
+
+const appleSignInEnabled = Platform.OS === 'ios' && !!Constants.expoConfig?.ios?.usesAppleSignIn;
 
 export default function SignInScreen() {
   const dark = useColorScheme() === 'dark';
@@ -43,7 +46,7 @@ export default function SignInScreen() {
     <Screen>
       <Text muted>Sign in to keep your recipes in sync across your devices.</Text>
 
-      {Platform.OS === 'ios' ? (
+      {appleSignInEnabled ? (
         <AppleAuthentication.AppleAuthenticationButton
           buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
           buttonStyle={

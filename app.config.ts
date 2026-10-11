@@ -1,7 +1,20 @@
 import type { ExpoConfig } from 'expo/config';
+import { withEntitlementsPlist, type ConfigPlugin } from 'expo/config-plugins';
 
 // Builds run locally (Xcode / Android Studio) from `npx expo prebuild`.
 // No EAS or Expo account is used, so bump buildNumber/versionCode by hand per release.
+
+// Sign in with Apple needs a paid Apple Developer Program membership. While it's off, the
+// app has no Apple sign-in entitlement and builds sign with a free personal team.
+const appleSignIn = false;
+
+// Prebuild adds the entitlement whenever expo-apple-authentication is installed, so remove it.
+const withoutAppleSignIn: ConfigPlugin = (config) =>
+  withEntitlementsPlist(config, (config) => {
+    delete config.modResults['com.apple.developer.applesignin'];
+    return config;
+  });
+
 const config: ExpoConfig = {
   name: 'ScranPlan',
   slug: 'scranplan',
@@ -14,7 +27,7 @@ const config: ExpoConfig = {
     bundleIdentifier: 'com.scranplan.app',
     buildNumber: '1',
     icon: './assets/expo.icon',
-    usesAppleSignIn: true,
+    usesAppleSignIn: appleSignIn,
   },
   android: {
     package: 'com.scranplan.app',
@@ -31,7 +44,7 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-sqlite',
     'expo-secure-store',
-    'expo-apple-authentication',
+    ...(appleSignIn ? ['expo-apple-authentication'] : []),
     // Apps built with the iOS 27 SDK must use the scene lifecycle (default from SDK 58).
     ['expo-build-properties', { ios: { enableSceneSupport: true } }],
     [
@@ -49,4 +62,4 @@ const config: ExpoConfig = {
   },
 };
 
-export default config;
+export default appleSignIn ? config : withoutAppleSignIn(config);
