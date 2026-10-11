@@ -8,8 +8,11 @@ import { spacing, useColors } from '@/ui/theme';
 import { useNow } from './hooks';
 import { useTimers } from './timers-store';
 
-/** One line showing the timer due next (or one that has finished). Opens the Timers tab. */
-export function NextTimerStrip() {
+/**
+ * One line showing the timer due next (or one that has finished). Opens the Timers tab unless
+ * `linked` is false, as in cook mode, where leaving would lose your place.
+ */
+export function NextTimerStrip({ linked = true }: { linked?: boolean }) {
   const colors = useColors();
   const timers = useTimers();
   const now = useNow(timers.length > 0);
@@ -22,8 +25,9 @@ export function NextTimerStrip() {
 
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityHint="Opens your timers"
+      accessibilityRole={linked ? 'button' : 'text'}
+      accessibilityHint={linked ? 'Opens your timers' : undefined}
+      disabled={!linked}
       onPress={() => router.navigate('/timers')}
       style={styles.strip}
     >
