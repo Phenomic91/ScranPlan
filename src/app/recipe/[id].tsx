@@ -6,6 +6,7 @@ import type { Recipe } from '@/domain/recipes/recipe';
 import { useCookProgress } from '@/features/cook/cook-progress-store';
 import { ingredientText, scaledIngredients } from '@/features/cook/scaled-ingredients';
 import { StepTimerChip } from '@/features/cook/step-timer-chip';
+import { SourceLine } from '@/features/import/source-line';
 import { recipeSummary } from '@/features/recipes/recipe-card';
 import { deleteRecipe, isStarterRecipe, useRecipe } from '@/features/recipes/recipes-store';
 import { Button } from '@/ui/button';
@@ -49,6 +50,7 @@ function RecipeDetail({ recipe }: { recipe: Recipe }) {
         {recipeSummary(recipe)}
       </Text>
       {recipe.blurb ? <Text muted>{recipe.blurb}</Text> : null}
+      {recipe.source ? <SourceLine source={recipe.source} /> : null}
       {recipe.oven ? (
         <ChipRow>
           <Chip label={`Oven ${formatOvenSetting(recipe.oven)}`} />

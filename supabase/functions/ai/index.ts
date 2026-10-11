@@ -38,15 +38,23 @@ export default {
     if (error) return Response.json({ error: error.message }, { status: 500 });
     if (!allowed) return Response.json({ error: 'Monthly AI allowance used' }, { status: 429 });
 
-    const response = await anthropic.beta.messages.create({
-      model: CLAUDE_MODEL,
-      max_tokens: maxTokens,
-      betas: [CLAUDE_FALLBACK_BETA],
-      fallbacks: 'default',
-      system,
-      messages: [{ role: 'user', content: prompt }],
-      output_config: { effort: CLAUDE_EFFORT, format: { type: 'json_schema', schema } },
-    });
+    let response;
+    try {
+      response = await anthropic.beta.messages.create({
+        model: CLAUDE_MODEL,
+        max_tokens: maxTokens,
+        betas: [CLAUDE_FALLBACK_BETA],
+        fallbacks: 'default',
+        system,
+        messages: [{ role: 'user', content: prompt }],
+        output_config: { effort: CLAUDE_EFFORT, format: { type: 'json_schema', schema } },
+      });
+    } catch (caught) {
+      // A bad key or an Anthropic outage should reach the app as a reason, not a bare 500.
+      if (!(caught instanceof Anthropic.APIError)) throw caught;
+      console.error(caught);
+      return Response.json({ error: `Claude failed: ${claudeReason(caught)}` }, { status: 502 });
+    }
 
     if (response.stop_reason === 'refusal' || response.stop_reason === 'max_tokens') {
       return Response.json(
@@ -60,3 +68,9 @@ export default {
     return Response.json({ text: text.text });
   }),
 };
+
+function claudeReason(error: InstanceType<typeof Anthropic.APIError>): string {
+  const body = error.error as { error?: { message?: unknown } } | undefined;
+  const message = body?.error?.message;
+  return typeof message === 'string' ? message : `status ${error.status ?? 'unknown'}`;
+}

@@ -18,6 +18,7 @@ export default function RecipesScreen() {
   return (
     <Screen title="Recipes">
       <Button label="New recipe" onPress={() => router.push('/recipe/new')} />
+      <Button label="Import a recipe" onPress={() => router.push('/import')} />
       <ChipRow>
         <Chip
           label="Veggie only"

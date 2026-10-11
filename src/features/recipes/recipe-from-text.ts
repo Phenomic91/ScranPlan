@@ -1,6 +1,6 @@
 import { runAiTask, AiUnavailableError } from '@/ai/router';
 import { parseIngredients } from '@/ai/tasks/parse-ingredients';
-import { ingredient, step, type Ingredient } from '@/domain/recipes/recipe';
+import { defaultShortName, ingredient, step, type Ingredient } from '@/domain/recipes/recipe';
 
 import type { RecipeDraft } from './recipes-store';
 
@@ -22,7 +22,7 @@ export async function recipeFromForm(form: RecipeForm): Promise<RecipeDraft> {
   const name = form.name.trim();
   return {
     name,
-    shortName: name.split(/\s+/).slice(0, 2).join(' '),
+    shortName: defaultShortName(name),
     serves: positiveInteger(form.serves, 2),
     minutes: positiveInteger(form.minutes, 30),
     vegetarian: false,

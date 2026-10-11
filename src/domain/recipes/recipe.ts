@@ -27,6 +27,18 @@ export const ovenSettingSchema = z.object({
 });
 export type OvenSetting = z.infer<typeof ovenSettingSchema>;
 
+/** Where an imported recipe came from. Recipes typed into the app have none. */
+export const recipeSourceSchema = z.object({
+  /** The page it was imported from; null for pasted text. */
+  url: z.string().nullable(),
+  siteName: z.string().nullable(),
+  author: z.string().nullable(),
+  importedAt: z.string(),
+  /** True when AI filled gaps the original left, such as a missing method or servings. */
+  inferred: z.boolean(),
+});
+export type RecipeSource = z.infer<typeof recipeSourceSchema>;
+
 export const recipeSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
@@ -40,8 +52,14 @@ export const recipeSchema = z.object({
   ingredients: z.array(ingredientSchema),
   steps: z.array(stepSchema),
   note: z.string(),
+  source: recipeSourceSchema.optional(),
 });
 export type Recipe = z.infer<typeof recipeSchema>;
+
+/** The first two words of the name, used until the user picks a better short name. */
+export function defaultShortName(name: string): string {
+  return name.trim().split(/\s+/).slice(0, 2).join(' ');
+}
 
 export function ingredient(amount: number | null, unit: Unit, name: string): Ingredient {
   return { amount, unit, name };

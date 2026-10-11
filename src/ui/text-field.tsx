@@ -35,5 +35,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     fontSize: 16,
   },
-  multiline: { minHeight: 120, paddingVertical: spacing.md, textAlignVertical: 'top' },
+  // Capped so long pastes scroll inside the box and the caret stays above the keyboard.
+  multiline: {
+    minHeight: 120,
+    maxHeight: 220,
+    paddingVertical: spacing.md,
+    textAlignVertical: 'top',
+  },
 });
