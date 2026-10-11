@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native';
 
 import { DatabaseGate } from '@/db/database-gate';
 import { AuthProvider } from '@/features/auth/auth-provider';
+import { TimerHousekeeping } from '@/features/timers/timers-store';
 import { SyncProvider } from '@/sync/sync-provider';
 import { useColors } from '@/ui/theme';
 
@@ -17,6 +18,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={theme}>
       <DatabaseGate>
+        <TimerHousekeeping />
         <AuthProvider>
           <SyncProvider>
             <Stack>
